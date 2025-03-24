@@ -8,163 +8,33 @@ ApplicationWindow {
     id: applicationWindow
     // Define the main window
     visible: true
-    width: 500
+    width: 1000
     height: 500
-    color: "#626161"
-
-    // Object Properties
-    property var needleVal:0
-    property color stdColor:"#e5e5e5"
-    property var warningVal:60
-    property color warningColor:"#fb8d1a"
-    property var criticalVal:80
-    property color criticalColor:"#e8083e"
-    property var maxVal:100
-    property color faceColor: "#00516F"
+    color: "#626262"
 
     Rectangle{
         id:gaugeBackground
         color:"#292929"
-        radius: rpmGauge.height
-        anchors.centerIn: rpmGauge
-        height: rpmGauge.height*1.1
-        width: rpmGauge.width*1.1
-    }
-
-    // Define the gauge object
-    CircularGauge {
-        id: rpmGauge
+        radius: leftRpm.height
         anchors.centerIn: parent
-        width: parent.width*0.8
-        height: parent.height*0.8
-        stepSize: 0.1
-        transformOrigin: Item.Center
-        antialiasing: true
-
-        // Value (needle position)
-        value: needleVal // Drive value with propert
-
-        // Space key press will modify the needle value
-        Keys.onSpacePressed: (needleVal == 0) ? needleVal = Math.random()*maxVal : needleVal = 0;
-        Keys.onReleased: {
-            if (event.key === Qt.Key_Space) {
-                event.accepted = true; // Is completion of the event required for function?
-            }
-        }
-        Component.onCompleted: forceActiveFocus()
-
-        // Use gauge value for an animation (smoothing needle motion)
-        Behavior on value {
-            NumberAnimation {
-                duration: 200
-            }
-        }
-
-        // Function for color selection based on value range
-        function getColor(value){
-             var tickColor;
-
-             if(value >= criticalVal)
-                 tickColor = criticalColor;
-             else if (value >= warningVal)
-                 tickColor = warningColor
-             else
-                 tickColor = stdColor
-
-             return tickColor
-        }
-
-        // Define visual style of the gauge:
-        style:CircularGaugeStyle{
-           // Functions to condense calls for angle conversion
-           function degreesToRadians(degrees) {return degrees * (Math.PI / 180)}
-           function getAngleFromValue(val){return degreesToRadians(valueToAngle(val) - 90)}
-
-           // Funciton to simplify repeated arc draws
-           function drawGaugeArc(ctx, radiusScale, startAngle, endAngle, color, lineWidth){
-               ctx.beginPath();
-               ctx.strokeStyle = color;
-               ctx.lineWidth = lineWidth;
-               ctx.arc(outerRadius, outerRadius, outerRadius*radiusScale - ctx.lineWidth / 2, startAngle, endAngle);
-               ctx.stroke();
-           }
-
-           tickmarkLabel:  Text {
-               font.pixelSize: Math.max(15, outerRadius * 0.15)
-               font.bold: true
-               text: styleData.value
-               color: rpmGauge.getColor(styleData.value)
-               antialiasing: true
-           }
-
-           tickmark: Rectangle {
-               implicitWidth: outerRadius * 0.02
-               antialiasing: true
-               implicitHeight: outerRadius * 0.08
-               color: rpmGauge.getColor(styleData.value)
-           }
-
-           minorTickmark: Rectangle {
-               visible: styleData.value < warningVal
-               implicitWidth: outerRadius * 0.01
-               antialiasing: true
-               implicitHeight: outerRadius * 0.08
-               color: stdColor
-           }
-
-           // Background (used to draw arcs)
-           background:
-            Canvas {
-                onPaint: {
-                   var ctx = getContext("2d");
-                   ctx.reset();
-
-                   // Gauge Face
-                   drawGaugeArc(ctx,1,0,2*Math.PI, faceColor, outerRadius*0.5)
-
-                   // Critical Arcs
-                   drawGaugeArc(ctx,0.5,getAngleFromValue(criticalVal), getAngleFromValue(maxVal), criticalColor, outerRadius * 0.03)
-                   drawGaugeArc(ctx,1,getAngleFromValue(criticalVal), getAngleFromValue(maxVal), criticalColor, outerRadius * 0.03)
-
-                   // Warning Arcs
-                   drawGaugeArc(ctx, 0.5, getAngleFromValue(warningVal), getAngleFromValue(criticalVal), warningColor, outerRadius * 0.03)
-                   drawGaugeArc(ctx, 1, getAngleFromValue(warningVal), getAngleFromValue(criticalVal), warningColor, outerRadius * 0.03)
-
-                   // Std Arcs
-                   drawGaugeArc(ctx, 0.5, getAngleFromValue(0), getAngleFromValue(warningVal), stdColor, outerRadius * 0.03)
-                   drawGaugeArc(ctx, 1, getAngleFromValue(0), getAngleFromValue(warningVal), stdColor, outerRadius * 0.03)
-                }
-            }
-           //minimumValueAngle: -100
-           //maximumValueAngle: 100
-        }
-
-        // Gauge range (minimum and maximum values)
-        minimumValue: 0
-        maximumValue: 100
-
-        // How to add value readout?
-        Label{
-            id: valueLabel
-            text: (rpmGauge.value*1000).toFixed(0)
-            color: rpmGauge.getColor(rpmGauge.value)
-            anchors.verticalCenterOffset: parent.height*0.3
-            anchors.horizontalCenterOffset: 0
-            anchors.centerIn: parent
-            font.pixelSize: rpmGauge.height*0.06
-            font.bold: true
-        }
-
-        Label{
-            id: unitLabel
-            text: "RPM x1000"
-            color: stdColor
-            anchors.verticalCenterOffset: parent.height*0.42
-            anchors.horizontalCenterOffset: 0
-            anchors.centerIn: parent
-            font.pixelSize: rpmGauge.height*0.06
-            font.bold: true
-        }
+        height: leftRpm.height*1.1
+        width: parent.width
     }
+
+    RpmGauge{
+        id:leftRpm
+        anchors.horizontalCenterOffset: -parent.width/4
+    }
+
+    RpmGauge{
+        id:rightRpm
+        anchors.horizontalCenterOffset: parent.width/4
+    }
+
 }
 
+/*##^##
+Designer {
+    D{i:0;formeditorZoom:0.6600000262260437}
+}
+##^##*/
