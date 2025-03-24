@@ -5,11 +5,12 @@ import QtQuick.Extras 1.4
 import QtQuick.Controls 2.12
 
 ApplicationWindow {
+    id: applicationWindow
     // Define the main window
     visible: true
     width: 500
     height: 500
-    color: "#292929"
+    color: "#626161"
 
     // Object Properties
     property var needleVal:0
@@ -21,12 +22,22 @@ ApplicationWindow {
     property var maxVal:100
     property color faceColor: "#00516F"
 
+    Rectangle{
+        id:gaugeBackground
+        color:"#292929"
+        radius: rpmGauge.height
+        anchors.centerIn: rpmGauge
+        height: rpmGauge.height*1.1
+        width: rpmGauge.width*1.1
+    }
+
     // Define the gauge object
     CircularGauge {
         id: rpmGauge
         anchors.centerIn: parent
         width: parent.width*0.8
         height: parent.height*0.8
+        stepSize: 0.1
         transformOrigin: Item.Center
         antialiasing: true
 
@@ -49,37 +60,28 @@ ApplicationWindow {
             }
         }
 
+        // Function for color selection based on value range
+        function getColor(value){
+             var tickColor;
+
+             if(value >= criticalVal)
+                 tickColor = criticalColor;
+             else if (value >= warningVal)
+                 tickColor = warningColor
+             else
+                 tickColor = stdColor
+
+             return tickColor
+        }
+
         // Define visual style of the gauge:
         style:CircularGaugeStyle{
-
-           function degreesToRadians(degrees) {
-               return degrees * (Math.PI / 180);
-           }
-
-           // Function to condense calls for angle conversion
-           function getAngleFromValue(val)
-           {
-               return degreesToRadians(valueToAngle(val) - 90)
-           }
-
-           // Function for color selection based on value range
-           function getColor(value)
-           {
-                var tickColor;
-
-                if(value >= criticalVal)
-                    tickColor = criticalColor;
-                else if (value >= warningVal)
-                    tickColor = warningColor
-                else
-                    tickColor = stdColor
-
-                return tickColor
-           }
+           // Functions to condense calls for angle conversion
+           function degreesToRadians(degrees) {return degrees * (Math.PI / 180)}
+           function getAngleFromValue(val){return degreesToRadians(valueToAngle(val) - 90)}
 
            // Funciton to simplify repeated arc draws
-           function drawGaugeArc(ctx, radiusScale, startAngle, endAngle, color, lineWidth)
-           {
+           function drawGaugeArc(ctx, radiusScale, startAngle, endAngle, color, lineWidth){
                ctx.beginPath();
                ctx.strokeStyle = color;
                ctx.lineWidth = lineWidth;
@@ -87,21 +89,19 @@ ApplicationWindow {
                ctx.stroke();
            }
 
-           //tickmarkInset: outerRadius*0.2
            tickmarkLabel:  Text {
                font.pixelSize: Math.max(15, outerRadius * 0.15)
                font.bold: true
-               //font.family:
-               text: styleData.value/10
-               color: getColor(styleData.value)
+               text: styleData.value
+               color: rpmGauge.getColor(styleData.value)
                antialiasing: true
            }
 
            tickmark: Rectangle {
-               implicitWidth: outerRadius * 0.03
+               implicitWidth: outerRadius * 0.02
                antialiasing: true
-               implicitHeight: outerRadius * 0.1
-               color: getColor(styleData.value)
+               implicitHeight: outerRadius * 0.08
+               color: rpmGauge.getColor(styleData.value)
            }
 
            minorTickmark: Rectangle {
@@ -114,36 +114,27 @@ ApplicationWindow {
 
            // Background (used to draw arcs)
            background:
-                Canvas {
-                    onPaint: {
-                       var ctx = getContext("2d");
-                       ctx.reset();
+            Canvas {
+                onPaint: {
+                   var ctx = getContext("2d");
+                   ctx.reset();
 
-                       // Gauge Face
-                       drawGaugeArc(ctx,1,0,2*Math.PI, faceColor, outerRadius/2)
+                   // Gauge Face
+                   drawGaugeArc(ctx,1,0,2*Math.PI, faceColor, outerRadius*0.5)
 
-                       // Critical Arcs
-                       drawGaugeArc(ctx,0.5,getAngleFromValue(criticalVal), getAngleFromValue(maxVal), criticalColor, outerRadius * 0.03)
-                       drawGaugeArc(ctx,1,getAngleFromValue(criticalVal), getAngleFromValue(maxVal), criticalColor, outerRadius * 0.03)
+                   // Critical Arcs
+                   drawGaugeArc(ctx,0.5,getAngleFromValue(criticalVal), getAngleFromValue(maxVal), criticalColor, outerRadius * 0.03)
+                   drawGaugeArc(ctx,1,getAngleFromValue(criticalVal), getAngleFromValue(maxVal), criticalColor, outerRadius * 0.03)
 
-                       // Warning Arcs
-                       drawGaugeArc(ctx, 0.5, getAngleFromValue(warningVal), getAngleFromValue(criticalVal), warningColor, outerRadius * 0.03)
-                       drawGaugeArc(ctx, 1, getAngleFromValue(warningVal), getAngleFromValue(criticalVal), warningColor, outerRadius * 0.03)
+                   // Warning Arcs
+                   drawGaugeArc(ctx, 0.5, getAngleFromValue(warningVal), getAngleFromValue(criticalVal), warningColor, outerRadius * 0.03)
+                   drawGaugeArc(ctx, 1, getAngleFromValue(warningVal), getAngleFromValue(criticalVal), warningColor, outerRadius * 0.03)
 
-                       // Std Arcs
-                       drawGaugeArc(ctx, 0.5, getAngleFromValue(0), getAngleFromValue(warningVal), stdColor, outerRadius * 0.03)
-                       drawGaugeArc(ctx, 1, getAngleFromValue(0), getAngleFromValue(warningVal), stdColor, outerRadius * 0.03)
-                    }
+                   // Std Arcs
+                   drawGaugeArc(ctx, 0.5, getAngleFromValue(0), getAngleFromValue(warningVal), stdColor, outerRadius * 0.03)
+                   drawGaugeArc(ctx, 1, getAngleFromValue(0), getAngleFromValue(warningVal), stdColor, outerRadius * 0.03)
                 }
-
-                // How to add value readout?
-                Text{
-                    text: styleData.value
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -outerRadius*0.5
-                    font.pixelSize: Math.max(15, outerRadius * 0.15)
-                }
-
+            }
            //minimumValueAngle: -100
            //maximumValueAngle: 100
         }
@@ -151,6 +142,29 @@ ApplicationWindow {
         // Gauge range (minimum and maximum values)
         minimumValue: 0
         maximumValue: 100
+
+        // How to add value readout?
+        Label{
+            id: valueLabel
+            text: (rpmGauge.value*1000).toFixed(0)
+            color: rpmGauge.getColor(rpmGauge.value)
+            anchors.verticalCenterOffset: parent.height*0.3
+            anchors.horizontalCenterOffset: 0
+            anchors.centerIn: parent
+            font.pixelSize: rpmGauge.height*0.06
+            font.bold: true
+        }
+
+        Label{
+            id: unitLabel
+            text: "RPM x1000"
+            color: stdColor
+            anchors.verticalCenterOffset: parent.height*0.42
+            anchors.horizontalCenterOffset: 0
+            anchors.centerIn: parent
+            font.pixelSize: rpmGauge.height*0.06
+            font.bold: true
+        }
     }
 }
 
