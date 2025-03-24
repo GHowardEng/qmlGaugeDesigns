@@ -18,7 +18,7 @@ CircularGauge {
     property var needleVal:0
 
     anchors.centerIn: parent
-    width: parent.width/3
+    width: parent.width/2
     height: parent.height/1.5
     stepSize: 0.1
     antialiasing: true
@@ -26,19 +26,10 @@ CircularGauge {
     // Value (needle position)
     value: needleVal // Drive value with propert
 
-    // Space key press will modify the needle value
-    Keys.onSpacePressed: (needleVal == 0) ? needleVal = Math.random()*maxVal : needleVal = 0;
-    Keys.onReleased: {
-        if (event.key === Qt.Key_Space) {
-            event.accepted = true; // Is completion of the event required for function?
-        }
-    }
-    Component.onCompleted: forceActiveFocus()
-
     // Use gauge value for an animation (smoothing needle motion)
     Behavior on value {
         NumberAnimation {
-            duration: 200
+            duration: 100
         }
     }
 

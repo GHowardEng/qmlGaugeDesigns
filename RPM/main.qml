@@ -8,7 +8,7 @@ ApplicationWindow {
     id: applicationWindow
     // Define the main window
     visible: true
-    width: 1000
+    width: 800
     height: 500
     color: "#626262"
 
@@ -19,6 +19,22 @@ ApplicationWindow {
         anchors.centerIn: parent
         height: leftRpm.height*1.1
         width: parent.width
+
+        // Space key press will modify the needle values
+        Keys.onSpacePressed: (Math.random() > 0.5) ?  rightRandom() : leftRandom();
+        Keys.onReleased: {
+            if (event.key === Qt.Key_Space) {
+                event.accepted = true; // Is completion of the event required for function?
+            }
+        }
+        Component.onCompleted: forceActiveFocus()
+
+        function rightRandom() {
+            (rightRpm.needleVal == 0) ? rightRpm.needleVal = Math.random()*rightRpm.maxVal : rightRpm.needleVal = 0;
+        }
+        function leftRandom (){
+            (leftRpm.needleVal == 0) ? leftRpm.needleVal = Math.random()*leftRpm.maxVal : leftRpm.needleVal = 0;
+        }
     }
 
     RpmGauge{
@@ -30,7 +46,6 @@ ApplicationWindow {
         id:rightRpm
         anchors.horizontalCenterOffset: parent.width/4
     }
-
 }
 
 /*##^##
