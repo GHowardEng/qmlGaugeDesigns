@@ -24,17 +24,17 @@ ApplicationWindow {
         Keys.onSpacePressed: (Math.random() > 0.5) ?  rightRandom() : leftRandom();
         Keys.onReleased: {
             if (event.key === Qt.Key_Space) {
-                event.accepted = true; // Is completion of the event required for function?
+                event.accepted = true;
             }
         }
         Component.onCompleted: forceActiveFocus()
 
-        function rightRandom() {
-            (rightRpm.needleVal == 0) ? rightRpm.needleVal = Math.random()*rightRpm.maxVal : rightRpm.needleVal = 0;
-        }
-        function leftRandom (){
-            (leftRpm.needleVal == 0) ? leftRpm.needleVal = Math.random()*leftRpm.maxVal : leftRpm.needleVal = 0;
-        }
+        // Try using alias
+        property alias rightVal: rightRpm.needleVal
+        property alias leftVal: leftRpm.needleVal
+
+        function rightRandom() {(rightVal == 0) ? rightVal = Math.random()*rightRpm.maxVal : rightVal = 0;}
+        function leftRandom() {(leftVal == 0) ? leftVal = Math.random()*leftRpm.maxVal : leftVal = 0;}
     }
 
     RpmGauge{
