@@ -1,6 +1,6 @@
 ## QML Instruments Examples
 
-Repository to explore the creation of qml components for use in instrumentaion applications.
+Repository to explore the creation of qml components for use in instrumentation applications.
 
 ### RPM Project
 
