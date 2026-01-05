@@ -1,0 +1,4 @@
+# QT QML Ignores
+
+build/
+*.pro.user
