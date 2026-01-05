@@ -10,14 +10,14 @@ ApplicationWindow {
     visible: true
     width: 800
     height: 500
-    color: "#626262"
+    color: "#101010"
 
     Rectangle{
         id:gaugeBackground
         color:"#292929"
-        radius: leftRpm.height
+        radius: leftRpm.height*1.1
         anchors.centerIn: parent
-        height: leftRpm.height*1.1
+        height: leftRpm.height*1.2
         width: parent.width
 
         // Space key press will modify the needle values
@@ -31,10 +31,13 @@ ApplicationWindow {
 
         // Try using alias
         property alias rightVal: rightRpm.needleVal
-        property alias leftVal: leftRpm.needleVal
+        property alias rightSet: rightRpm.setpointVal
 
-        function rightRandom() {(rightVal == 0) ? rightVal = Math.random()*rightRpm.maxVal : rightVal = 0;}
-        function leftRandom() {(leftVal == 0) ? leftVal = Math.random()*leftRpm.maxVal : leftVal = 0;}
+        property alias leftVal: leftRpm.needleVal
+        property alias leftSet: leftRpm.setpointVal
+
+        function rightRandom() {(rightVal == 0) ? rightVal = Math.random()*rightRpm.maxVal : rightVal = 0; rightSet = rightVal}
+        function leftRandom() {(leftVal == 0) ? leftVal = Math.random()*leftRpm.maxVal : leftVal = 0; leftSet = leftVal}
     }
 
     RpmGauge{

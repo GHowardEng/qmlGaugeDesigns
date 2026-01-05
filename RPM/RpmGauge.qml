@@ -9,13 +9,17 @@ CircularGauge {
 
     // Object Properties
     property color stdColor:"#e5e5e5"
-    property var warningVal:60
+    property real warningVal:60
     property color warningColor:"#fb8d1a"
-    property var criticalVal:80
+    property real criticalVal:80
     property color criticalColor:"#e8083e"
-    property var maxVal:100
-    property color faceColor: "#00516F"
-    property var needleVal:0
+    property real maxVal:90
+    property color faceColor: "#1F1F1F"
+    property real needleVal:0
+    property color setpointBackgroundColor: "#204000"
+    property color setpointActiveColor: "#20F000"
+    property real setpointVal:10
+    property bool showSetpoint : true
 
     anchors.centerIn: parent
     width: parent.width/2
@@ -28,6 +32,12 @@ CircularGauge {
 
     // Use gauge value for an animation (smoothing needle motion)
     Behavior on value {
+        NumberAnimation {
+            duration: 100
+        }
+    }
+
+    Behavior on setpointVal{
         NumberAnimation {
             duration: 100
         }
@@ -78,16 +88,22 @@ CircularGauge {
        }
 
        minorTickmark: Rectangle {
-           visible: styleData.value < gauge.warningVal
+           visible: styleData.value < gauge.maxVal
            implicitWidth: outerRadius * 0.01
            antialiasing: true
            implicitHeight: outerRadius * 0.08
-           color: gauge.stdColor
+           color: gauge.getColor(styleData.value)
        }
 
        // Background (used to draw arcs)
        background:
         Canvas {
+            id:canvas
+            Connections{
+                target:gauge
+                function onSetpointValChanged(){ canvas.requestPaint() }
+            }
+
             onPaint: {
                var ctx = getContext("2d");
                ctx.reset();
@@ -106,17 +122,21 @@ CircularGauge {
                // Std Arcs
                drawGaugeArc(ctx, 0.5, getAngleFromValue(0), getAngleFromValue(gauge.warningVal), gauge.stdColor, outerRadius * 0.03)
                drawGaugeArc(ctx, 1, getAngleFromValue(0), getAngleFromValue(gauge.warningVal), gauge.stdColor, outerRadius * 0.03)
+
+               // Setpoint
+               if(showSetpoint){
+                drawGaugeArc(ctx, 0.65, getAngleFromValue(0), getAngleFromValue(gauge.maxVal), gauge.setpointBackgroundColor, outerRadius * 0.03)
+                drawGaugeArc(ctx, 0.65, getAngleFromValue(0), getAngleFromValue(gauge.setpointVal), gauge.setpointActiveColor, outerRadius * 0.03)
+               }
+
             }
         }
-       //minimumValueAngle: -100
-       //maximumValueAngle: 100
     }
 
     // Gauge range (minimum and maximum values)
     minimumValue: 0
-    maximumValue: 100
+    maximumValue: maxVal
 
-    // How to add value readout?
     Label{
         id: valueLabel
         text: (gauge.value*1000).toFixed(0)
